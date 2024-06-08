@@ -3,12 +3,43 @@ const data = require("../data/data");
 
 const userController = {
   searchFlight: (req, res) => {
-    // Logic to search for flights
-    res.status(200).json({ message: "Search for flights" });
+    const { name, date, flightNumber } = req.query;
+
+    // Filter flights based on query parameters
+    let flights = data.flights;
+    if (name) {
+      flights = flights.filter((flight) =>
+        flight.name.toLowerCase().includes(name.toLowerCase())
+      );
+    }
+    if (date) {
+      flights = flights.filter((flight) => flight.date === date);
+    }
+    if (flightNumber) {
+      flights = flights.filter(
+        (flight) => flight.flightNumber === flightNumber
+      );
+    }
+
+    res.status(200).json({ flights });
   },
+
   bookTicket: (req, res) => {
-    // Logic to book tickets
-    res.status(200).json({ message: "Book ticket" });
+    const { flightNumber } = req.body;
+    const flight = data.flights.find((f) => f.flightNumber === flightNumber);
+
+    if (!flight) {
+      return res.status(404).json({ message: "Flight not found" });
+    }
+
+    if (flight.bookedSeats >= 60) {
+      return res.status(400).json({ message: "No seats available" });
+    }
+
+    flight.bookedSeats += 1;
+    data.bookings.push({ userId: req.user.id, flightNumber });
+
+    res.status(200).json({ message: "Ticket booked successfully", flight });
   },
 
   // Get all users

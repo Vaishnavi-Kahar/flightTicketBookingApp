@@ -24,10 +24,25 @@ let admins = [
   },
 ];
 
-let flights = [
-  { id: 1, name: "Flight 1", date: "2024-06-10", availableSeats: 60 },
-  { id: 2, name: "Flight 2", date: "2024-06-12", availableSeats: 60 },
-  { id: 3, name: "Flight 3", date: "2024-06-15", availableSeats: 60 },
+const flights = [
+  {
+    flightNumber: "AB123",
+    name: "Flight A",
+    date: "2024-06-15",
+    bookedSeats: 60,
+  },
+  {
+    flightNumber: "CD456",
+    name: "Flight B",
+    date: "2024-06-16",
+    bookedSeats: 0,
+  },
+  {
+    flightNumber: "EF789",
+    name: "Flight C",
+    date: "2024-06-16",
+    bookedSeats: 0,
+  },
 ];
 
 let bookings = [
