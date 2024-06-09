@@ -1,61 +1,53 @@
-// controllers/adminController.js
-const data = require("../data/data");
+const Flight = require("../models/Flight");
+const Booking = require("../models/Booking");
+const Admin = require("../models/Admin");
 
 const adminController = {
-  addFlight: (req, res) => {
+  addFlight: async (req, res) => {
     const { flightNumber, name, date } = req.body;
 
-    // Check if the flight number already exists
-    const existingFlight = data.flights.find(
-      (f) => f.flightNumber === flightNumber
-    );
+    const existingFlight = await Flight.findOne({ flightNumber });
     if (existingFlight) {
       return res.status(409).json({ message: "Flight number already exists" });
     }
 
-    // Add the new flight
-    const newFlight = { flightNumber, name, date, bookedSeats: 0 };
-    data.flights.push(newFlight);
+    const newFlight = new Flight({ flightNumber, name, date });
+    await newFlight.save();
 
     res.status(201).json({ message: "Flight added successfully", newFlight });
   },
-  viewBookings: (req, res) => {
-    const { flightNumber, name, date } = req.query;
+  viewBookings: async (req, res) => {
+    const { flightNumber, name, date } = req.body;
 
-    // Filter bookings based on query parameters
-    let filteredBookings = data.bookings;
+    let query = {};
+    if (flightNumber) query.flightNumber = flightNumber;
 
-    if (flightNumber) {
-      filteredBookings = filteredBookings.filter(
-        (b) => b.flightNumber === flightNumber
-      );
-    }
+    const flights = await Flight.find(query);
 
     if (name) {
-      const flight = data.flights.find(
+      const flight = flights.find(
         (f) => f.name.toLowerCase() === name.toLowerCase()
       );
-      if (flight) {
-        filteredBookings = filteredBookings.filter(
-          (b) => b.flightNumber === flight.flightNumber
-        );
-      } else {
+      if (!flight) {
         return res.status(404).json({ message: "Flight name not found" });
       }
+      query.flightNumber = flight.flightNumber;
     }
 
-    if (date) {
-      const flightsOnDate = data.flights.filter((f) => f.date === date);
-      const flightNumbersOnDate = flightsOnDate.map((f) => f.flightNumber);
-      filteredBookings = filteredBookings.filter((b) =>
-        flightNumbersOnDate.includes(b.flightNumber)
-      );
-    }
+    if (date) query.date = date;
 
-    res.status(200).json({ bookings: filteredBookings });
+    try {
+      const bookings = await Booking.find(query).populate("username");
+      res.status(200).json(bookings);
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Error fetching bookings", error: error });
+    }
   },
-  getAllAdmins: (req, res) => {
-    res.status(200).json(data.admins);
+  getAllAdmins: async (req, res) => {
+    const admins = await Admin.find();
+    res.status(200).json(admins);
   },
 };
 

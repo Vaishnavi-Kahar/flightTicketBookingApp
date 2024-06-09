@@ -1,22 +1,15 @@
 const jwt = require("jsonwebtoken");
-const passKey = "1234";
-//in-memory data
-let users = require("../data/data").users;
-let admins = require("../data/data").admins;
+const User = require("../models/User");
+const Admin = require("../models/Admin");
+const passKey = process.env.JWT_SECRET;
 
 const authController = {
-  login: (req, res) => {
+  login: async (req, res) => {
     const { username, password } = req.body;
-    // Check if user or admin exists and credentials are correct
-    const user = users.find(
-      (u) => u.username === username && u.password === password
-    );
-    const admin = admins.find(
-      (u) => u.username === username && u.password === password
-    );
+    const user = await User.findOne({ username, password });
+    const admin = await Admin.findOne({ username, password });
 
     if (user || admin) {
-      // Generate JWT token with user or admin information
       const payload = { username, role: user ? "user" : "admin" };
       const token = jwt.sign(payload, passKey);
 
@@ -25,16 +18,16 @@ const authController = {
       res.status(401).json({ message: "Invalid credentials" });
     }
   },
-  signup: (req, res) => {
+  signup: async (req, res) => {
     const { username, password } = req.body;
-    const existingUser = users.find((u) => u.username === username);
-    const existingAdmin = admins.find((a) => a.username === username);
 
+    const existingUser = await User.findOne({ username });
+    const existingAdmin = await Admin.findOne({ username });
     if (existingUser || existingAdmin) {
       res.status(409).json({ message: "Username already exists" });
     } else {
-      const newUser = { id: users.length + 1, username, password };
-      users.push(newUser);
+      const newUser = new User({ username, password });
+      await newUser.save();
       res.status(201).json({ message: "User signup successful", newUser });
     }
   },
