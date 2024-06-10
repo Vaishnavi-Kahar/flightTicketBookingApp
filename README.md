@@ -114,7 +114,7 @@ Note: Need to provide the jwt_token in the headers
   {
     "flightNumber": "AB123",
     "name": "Flight A",
-    "date":"2024-06-16
+    "date":"2024-06-16"
   }
   ```
 
