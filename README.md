@@ -27,7 +27,7 @@ I have deployed the backend on Render. The base URL for the deployed application
 3. Create a .env file in the root directory of your project and add these variables:
 
 ```makefile
-    MONGODB_URL = your_mongodb_connection_string
+    MONGO_URL = your_mongodb_connection_string
     JWT_SECRET = your_secret_key
     PORT = port_number
 ```
